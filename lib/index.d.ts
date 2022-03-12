@@ -2,7 +2,7 @@ declare type Auth = {
     AccessToken: string;
     CampaignID: string;
 };
-export default class {
+export declare class Patreon {
     private static _URL;
     private static _AccessToken;
     private static _CampaignID;

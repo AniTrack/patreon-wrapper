@@ -5,7 +5,7 @@ type Auth = {
     CampaignID: string
 }
 
-export default class {
+export class Patreon {
     private static _URL: string = 'https://www.patreon.com/api/oauth2/v2/'
 
     private static _AccessToken: string
