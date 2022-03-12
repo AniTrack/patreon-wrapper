@@ -11,7 +11,10 @@ declare type PatronType = {
         note: string;
         currentEntitled: {
             status: string;
-            tierId: number;
+            tier: {
+                id: number;
+                title: string;
+            };
             cents: number;
             willPayCents: number;
             lifetimeCents: number;
@@ -38,7 +41,7 @@ export declare class Patreon {
     static Authorization(AuthInformation: Auth): void;
     private static FetchAPI;
     private static CleanQueryURL;
-    static FetchPatrons(filter?: string[]): Promise<PatronType[]>;
+    static FetchPatrons(pageSize?: number): Promise<PatronType[]>;
 }
 export {};
 //# sourceMappingURL=index.d.ts.map

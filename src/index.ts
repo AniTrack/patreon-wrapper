@@ -74,11 +74,11 @@ export class Patreon {
         return query
     }
 
-    public static async FetchPatrons(filter: string[] = []) {
+    public static async FetchPatrons(pageSize: number = 450) {
         const res: any = await this.FetchAPI(
             this.CleanQueryURL(
                 `campaigns/${this._CampaignID}/` +
-                    `members ? include = user, currently_entitled_tiers & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`
+                    `members ? include = user, currently_entitled_tiers & page[count] = ${pageSize} & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`
             )
         )
 
