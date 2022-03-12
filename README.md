@@ -29,7 +29,7 @@ Typescript ES6
 import { Patreon } from '@AniTrack/patreon-wrapper'
 ```
 
-### Authorization
+Authorization
 ```js
 Patreon.Authorization({
     AccessToken: 'YOUR_API_V2_ACCESS_TOKEN',
