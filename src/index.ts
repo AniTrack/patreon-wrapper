@@ -14,7 +14,10 @@ type PatronType = {
         note: string
         currentEntitled: {
             status: string
-            tierId: number
+            tier: {
+                id: number
+                title: string
+            }
             cents: number
             willPayCents: number
             lifetimeCents: number
@@ -75,16 +78,26 @@ export class Patreon {
         const res: any = await this.FetchAPI(
             this.CleanQueryURL(
                 `campaigns/${this._CampaignID}/` +
-                    `members ? include = user, currently_entitled_tiers & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections`
+                    `members ? include = user, currently_entitled_tiers & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`
             )
         )
 
         const Patrons: Array<PatronType> = []
 
         res.data.data.forEach((Patron: any) => {
-            var include = res.data.included.find(
+            // console.dir(Patron)
+
+            var socialInfo = res.data.included.find(
                 (includePatron: any) =>
-                    includePatron.id == Patron.relationships.user.data.id
+                    includePatron.id == Patron.relationships.user.data.id &&
+                    includePatron.type === 'user'
+            )
+
+            var tierInfo = res.data.included.find(
+                (includePatron: any) =>
+                    includePatron.id ==
+                        Patron.relationships.currently_entitled_tiers?.data[0]
+                            ?.id && includePatron.type === 'tier'
             )
 
             Patrons.push({
@@ -96,8 +109,10 @@ export class Patreon {
                     note: Patron.attributes.note,
                     currentEntitled: {
                         status: Patron.attributes.patron_status,
-                        tierId: Patron.relationships.currently_entitled_tiers
-                            ?.data[0]?.id,
+                        tier: {
+                            id: tierInfo.id,
+                            title: tierInfo.attributes.title,
+                        },
                         cents: Patron.attributes
                             .currently_entitled_amount_cents,
                         willPayCents: Patron.attributes.will_pay_amount_cents,
@@ -114,11 +129,11 @@ export class Patreon {
                         url: Patron.relationships.user.links.related,
                     },
                     discord: {
-                        id: include.attributes.social_connections.discord
+                        id: socialInfo.attributes.social_connections.discord
                             .user_id,
                         url:
                             'https://discordapp.com/users/' +
-                            include.attributes.social_connections.discord
+                            socialInfo.attributes.social_connections.discord
                                 .user_id,
                     },
                 },
