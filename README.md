@@ -18,6 +18,17 @@ $ yarn add @anitrack/patreon-wrapper
 
 ## Example
 
+### Importing
+
+CommonJS
+```js
+const { Patreon } = require('@AniTrack/patreon-wrapper')
+```
+Typescript ES6
+```js
+import { Patreon } from '@AniTrack/patreon-wrapper'
+```
+
 #### Authorization
 ```js
 Patreon.Authorization({
