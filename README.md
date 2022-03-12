@@ -71,7 +71,10 @@ Clean Response Example
         note: '',
         currentEntitled: {
           status: 'active_patron',
-          tierId: '12345678',
+          tier: {
+            id: '12345678',
+            title: 'Supporter 1'
+          },
           cents: 500, // 5 USD
           willPayCents: 500,
           lifetimeCents: 0,
