@@ -76,13 +76,13 @@ Clean Response Example
           lifetimeCents: 0,
           firstCharge: 'DATE',
           nextCharge: 'DATE',
-          lastCharge: null
+          lastCharge: 'DATE'
         }
       },
       mediaConnection: {
         patreon: {
           id: '12345678',
-          url: 'https://www.patreon.com/api/oauth2/v2/user/70437054'       
+          url: 'https://www.patreon.com/api/oauth2/v2/user/12345678'       
         },
         discord: {
           id: 'DISCORD_USER_ID',
