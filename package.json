@@ -1,0 +1,24 @@
+{
+    "name": "patreon-wrapper",
+    "version": "1.0.0",
+    "description": "Discord Patreon wrapper for AniTrack",
+    "main": "lib/index.js",
+    "types": "lib",
+    "scripts": {
+        "build": "tsc -p ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/AniTrack/patreon-wrapper.git"
+    },
+    "author": "AniTrack",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/AniTrack/patreon-wrapper/issues"
+    },
+    "homepage": "https://github.com/AniTrack/patreon-wrapper#readme",
+    "dependencies": {
+        "axios": "^0.26.1",
+        "typescript": "^4.6.2"
+    }
+}
