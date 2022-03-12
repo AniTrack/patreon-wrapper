@@ -5,6 +5,36 @@ type Auth = {
     CampaignID: string
 }
 
+type PatronType = {
+    displayId: string
+    displayName: string
+    emailAddress: string
+    isFollower: boolean
+    subscription: {
+        note: string
+        currentEntitled: {
+            status: string
+            tierId: number
+            cents: number
+            willPayCents: number
+            lifetimeCents: number
+            firstCharge: Date
+            nextCharge: Date
+            lastCharge: Date
+        }
+    }
+    mediaConnection: {
+        patreon: {
+            id: string
+            url: string
+        }
+        discord: {
+            id: string
+            url: string
+        }
+    }
+}
+
 export class Patreon {
     private static _URL: string = 'https://www.patreon.com/api/oauth2/v2/'
 
@@ -49,7 +79,7 @@ export class Patreon {
             )
         )
 
-        const Patrons: any[] = []
+        const Patrons: Array<PatronType> = []
 
         res.data.data.forEach((Patron: any) => {
             var include = res.data.included.find(
@@ -66,6 +96,8 @@ export class Patreon {
                     note: Patron.attributes.note,
                     currentEntitled: {
                         status: Patron.attributes.patron_status,
+                        tierId: Patron.relationships.currently_entitled_tiers
+                            ?.data[0]?.id,
                         cents: Patron.attributes
                             .currently_entitled_amount_cents,
                         willPayCents: Patron.attributes.will_pay_amount_cents,
