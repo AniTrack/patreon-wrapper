@@ -1,5 +1,5 @@
 # Patreon Wrapper 🍊
-Discord Patreon Wrapper for [AniTrack](https://anitrack.co) on node.js
+An Simple Patreon Wrapper with much cleaner responses
 
 ## Table of Contents
 - [Installing](#installing)
