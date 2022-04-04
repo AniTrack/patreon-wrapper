@@ -84,6 +84,9 @@ export class Patreon {
 
         const Patrons: Array<PatronType> = []
 
+        if (!res?.data?.data) return []
+        if (res.data.data.length == 0) return []
+
         res.data.data.forEach((Patron: any) => {
             // console.dir(Patron)
 
