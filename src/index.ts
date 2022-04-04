@@ -88,7 +88,7 @@ export class Patreon {
         if (res.data.data.length == 0) return []
 
         res.data.data.forEach((Patron: any) => {
-            // console.dir(Patron)
+            if (Patron.attributes.patron_status == 'declined_patron') return
 
             var socialInfo = res.data.included.find(
                 (includePatron: any) =>
