@@ -1,5 +1,5 @@
 # Patreon Wrapper 🍊
-An Simple Patreon Wrapper with much cleaner responses
+An Simple Patreon Wrapper with much cleaner responses. Patreon. Why u do dis..
 
 ## Table of Contents
 - [Installing](#installing)
@@ -73,7 +73,7 @@ Clean Response Example
           status: 'active_patron',
           tier: {
             id: '12345678',
-            title: 'Supporter 1'
+            title: 'First Tier'
           },
           cents: 500, // 5 USD
           willPayCents: 500,
