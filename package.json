@@ -1,7 +1,7 @@
 {
     "name": "@anitrack/patreon-wrapper",
-    "version": "1.4.3",
-    "description": "Discord Patreon wrapper for AniTrack",
+    "version": "1.4.4",
+    "description": "Universal Patron API v2 wrapper that simplifies the API's response for easier usage and lower response complexity",
     "main": "lib/index.js",
     "types": "lib",
     "scripts": {

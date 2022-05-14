@@ -1,6 +1,6 @@
 # Patreon Wrapper 🍊
 
-💎 Simple Patreon wrapper designed for Discord Bots to process user's premium subscription and lower down the Patreon API complexity...
+💎 Simple Patreon wrapper designed best for Discord Bots to process user's patreon subscription and lower down the Patreon API complexity...
 
 🌄 You can also simulates sandbox of fake Patrons for development and code testing purposes
 
