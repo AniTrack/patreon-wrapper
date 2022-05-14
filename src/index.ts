@@ -13,17 +13,17 @@ type PatronType = {
     subscription: {
         note: string
         currentEntitled: {
-            status: string
+            status: 'active_patron' | 'declined_patron'
             tier: {
-                id: number
+                id: string
                 title: string
             }
             cents: number
             willPayCents: number
             lifetimeCents: number
-            firstCharge: Date
-            nextCharge: Date
-            lastCharge: Date
+            firstCharge: string
+            nextCharge: string
+            lastCharge: string
         }
     }
     mediaConnection: {
@@ -38,15 +38,43 @@ type PatronType = {
     }
 }
 
+type SandboxOptions = {
+    displayId: string
+    displayName: string
+    emailAddress: string
+    tier: {
+        id: string
+        title: string
+    }
+    cents: number
+    willPayCents: number
+    lifetimeCents: number
+    patronStatus: 'active_patron' | 'declined_patron'
+    firstCharge: string
+    nextCharge: string
+    lastCharge: string
+    mediaConnection: {
+        patreon: {
+            id: string
+            url: string
+        }
+        discord: { id: string; url: string }
+    }
+}
+
 export class Patreon {
     private static _URL: string = 'https://www.patreon.com/api/oauth2/v2/'
 
     private static _AccessToken: string
     private static _CampaignID: string
 
+    private static _SandboxPatrons: Array<SandboxOptions> = []
+
     public static Authorization(AuthInformation: Auth) {
         if (!AuthInformation.AccessToken || !AuthInformation.CampaignID) {
-            throw new Error('Either Missing AccessToken or CampaignID')
+            throw new Error(
+                'AccessToken and CampaignID are required on Authorization'
+            )
         } else if (
             typeof AuthInformation.AccessToken != 'string' ||
             typeof AuthInformation.CampaignID != 'string'
@@ -59,6 +87,12 @@ export class Patreon {
     }
 
     private static async FetchAPI(URI: string) {
+        if (!this._AccessToken || !this._CampaignID) {
+            throw new Error(
+                'AccessToken and CampaignID are required on Authorization'
+            )
+        }
+
         return await axios(this._URL + URI, {
             method: 'GET',
             headers: { Authorization: 'Bearer ' + this._AccessToken },
@@ -74,7 +108,10 @@ export class Patreon {
         return query
     }
 
-    public static async FetchPatrons(pageSize: number = 450) {
+    public static async FetchPatrons(
+        filters: Array<'active_patron' | 'declined_patron'> = ['active_patron'],
+        pageSize: number = 450
+    ) {
         const res: any = await this.FetchAPI(
             this.CleanQueryURL(
                 `campaigns/${this._CampaignID}/` +
@@ -82,13 +119,50 @@ export class Patreon {
             )
         )
 
-        const Patrons: Array<PatronType> = []
+        var Patrons: Array<PatronType> = []
 
         if (!res?.data?.data) return []
         if (res.data.data.length == 0) return []
 
+        // Processing Fake Sandbox Patrons
+        this._SandboxPatrons.forEach((Patron: SandboxOptions) =>
+            Patrons.push({
+                displayId: Patron.displayId,
+                displayName: Patron.displayName,
+                emailAddress: Patron.emailAddress,
+                isFollower: false,
+                subscription: {
+                    note: 'Sandbox',
+                    currentEntitled: {
+                        status: Patron.patronStatus,
+                        tier: {
+                            id: Patron.tier.id,
+                            title: Patron.tier.title,
+                        },
+                        cents: Patron.cents,
+                        willPayCents: Patron.willPayCents,
+                        lifetimeCents: Patron.lifetimeCents,
+                        firstCharge: Patron.firstCharge,
+                        nextCharge: Patron.nextCharge,
+                        lastCharge: Patron.lastCharge,
+                    },
+                },
+                mediaConnection: {
+                    patreon: {
+                        id: Patron.mediaConnection.patreon.id,
+                        url: Patron.mediaConnection.patreon.url,
+                    },
+                    discord: {
+                        id: Patron.mediaConnection.discord.id,
+                        url: Patron.mediaConnection.discord.url,
+                    },
+                },
+            })
+        )
+
+        // Processing Real Patrons
         res.data.data.forEach((Patron: any) => {
-            if (Patron.attributes.patron_status == 'declined_patron') return
+            if (!filters.includes(Patron.attributes.patron_status)) return
 
             var socialInfo = res.data.included.find(
                 (includePatron: any) =>
@@ -113,11 +187,15 @@ export class Patreon {
                     currentEntitled: {
                         status: Patron.attributes.patron_status,
                         tier: {
-                            id: tierInfo.id,
-                            title: tierInfo.attributes.title,
+                            id: tierInfo ? tierInfo.id : null,
+                            title: tierInfo ? tierInfo.attributes.title : null,
                         },
-                        cents: Patron.attributes
-                            .currently_entitled_amount_cents,
+                        cents:
+                            Patron.attributes.currently_entitled_amount_cents !=
+                            0
+                                ? Patron.attributes
+                                      .currently_entitled_amount_cents
+                                : null,
                         willPayCents: Patron.attributes.will_pay_amount_cents,
                         lifetimeCents: Patron.attributes.lifetime_support_cents,
                         firstCharge:
@@ -145,7 +223,25 @@ export class Patreon {
         return Patrons
     }
 
+    protected static _SandboxAdd(Patron: SandboxOptions) {
+        this._SandboxPatrons.push(Patron)
+    }
+
+    protected static _SandboxGet() {
+        return this._SandboxPatrons
+    }
+
     // public static FetchPatron() {}
 
     // public static FetchCampaign() {}
+}
+
+export class Sandbox extends Patreon {
+    public static GetFakePatrons() {
+        return super._SandboxGet()
+    }
+
+    public static AppendPatron(Patron: SandboxOptions) {
+        super._SandboxAdd(Patron)
+    }
 }
