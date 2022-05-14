@@ -22,11 +22,11 @@ $ yarn add @anitrack/patreon-wrapper
 
 CommonJS
 ```js
-const { Patreon } = require('@AniTrack/patreon-wrapper')
+const { Patreon } = require('@anitrack/patreon-wrapper')
 ```
 Typescript ES6
 ```js
-import { Patreon } from '@AniTrack/patreon-wrapper'
+import { Patreon } from '@anitrack/patreon-wrapper'
 ```
 
 Authorization
