@@ -1,6 +1,6 @@
 {
     "name": "@anitrack/patreon-wrapper",
-    "version": "1.4.0",
+    "version": "1.4.2",
     "description": "Discord Patreon wrapper for AniTrack",
     "main": "lib/index.js",
     "types": "lib",
@@ -13,6 +13,11 @@
         "url": "git://github.com/AniTrack/patreon-wrapper.git"
     },
     "author": "AniTrack",
+    "keywords": [
+        "patreon",
+        "discord",
+        "api"
+    ],
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/AniTrack/patreon-wrapper/issues"

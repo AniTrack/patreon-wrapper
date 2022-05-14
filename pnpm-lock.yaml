@@ -7,10 +7,10 @@ specifiers:
 
 dependencies:
   axios: 0.27.2
-  typescript: 4.6.4
 
 devDependencies:
   ts-node: 10.7.0_typescript@4.6.4
+  typescript: 4.6.4
 
 packages:
 
@@ -160,7 +160,7 @@ packages:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: false
+    dev: true
 
   /v8-compile-cache-lib/3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}

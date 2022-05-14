@@ -13,6 +13,8 @@
 -   [Sandbox for development](#Sandboxing)
 -   [License](#license)
 
+<br />
+
 ## Installing
 
 Using NPM
@@ -128,14 +130,12 @@ Clean Response Example
 
 ## Sandboxing
 
-> This is great for development and working with fake patrons users. The fake patrons in FetchPatrons() will be exactly the same as real ones!
-
-<br />
+> This is great for development and working with fake patrons users. The fake patrons object will be exactly the same as real ones!
 
 ### Importing Sandbox
 
 ```js
-import { Patreon, Sandbox } from './index'
+import { Patreon, Sandbox } from '@anitrack/patreon-wrapper'
 ```
 
 ### Adding Fake Patrons to the Sandbox
