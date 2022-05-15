@@ -32,8 +32,8 @@ type PatronType = {
             url: string
         }
         discord: {
-            id: string
-            url: string
+            id: string | null
+            url: string | null
         }
     }
 }
@@ -58,7 +58,10 @@ type SandboxOptions = {
             id: string
             url: string
         }
-        discord: { id: string; url: string }
+        discord: {
+            id: string | null
+            url: string | null
+        }
     }
 }
 
@@ -153,8 +156,12 @@ export class Patreon {
                         url: Patron.mediaConnection.patreon.url,
                     },
                     discord: {
-                        id: Patron.mediaConnection.discord.id,
-                        url: Patron.mediaConnection.discord.url,
+                        id: Patron?.mediaConnection?.discord?.id
+                            ? Patron?.mediaConnection?.discord?.id
+                            : null,
+                        url: Patron?.mediaConnection?.discord?.url
+                            ? Patron?.mediaConnection?.discord?.id
+                            : null,
                     },
                 },
             })
@@ -210,12 +217,18 @@ export class Patreon {
                         url: Patron.relationships.user.links.related,
                     },
                     discord: {
-                        id: socialInfo.attributes.social_connections.discord
-                            .user_id,
+                        id: socialInfo?.attributes?.social_connections?.discord
+                            ?.user_id
+                            ? socialInfo?.attributes?.social_connections
+                                  ?.discord?.user_id
+                            : null,
                         url:
                             'https://discordapp.com/users/' +
-                            socialInfo.attributes.social_connections.discord
-                                .user_id,
+                            socialInfo?.attributes?.social_connections?.discord
+                                ?.user_id
+                                ? socialInfo?.attributes?.social_connections
+                                      ?.discord?.user_id
+                                : null,
                     },
                 },
             })

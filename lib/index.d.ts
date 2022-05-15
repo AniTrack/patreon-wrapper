@@ -29,8 +29,8 @@ declare type PatronType = {
             url: string;
         };
         discord: {
-            id: string;
-            url: string;
+            id: string | null;
+            url: string | null;
         };
     };
 };
@@ -55,8 +55,8 @@ declare type SandboxOptions = {
             url: string;
         };
         discord: {
-            id: string;
-            url: string;
+            id: string | null;
+            url: string | null;
         };
     };
 };
