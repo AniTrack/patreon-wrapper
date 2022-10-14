@@ -4,7 +4,7 @@
 
 🌄 You can also simulates sandbox of fake Patrons for development and code testing purposes
 
-🍊 This package was also used in [AniTrack](https://anitrack.co) Discord Bot
+🍊 This package was previously used in [AniTrack](https://anitrack.co) before switching to a real payment gateway
 
 ## Table of Contents
 
