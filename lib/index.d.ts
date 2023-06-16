@@ -69,12 +69,12 @@ export declare class Patreon {
     static Authorization(AuthCredentials: PatronAPIAuth): void;
     private static FetchAPI;
     private static CleanURL;
-    static FetchPatrons(filters?: Array<PatronStatus>, pageSize?: number): Promise<PatronType[]>;
+    static FetchPatrons(filters?: Array<PatronStatus>, pageSize?: number, showSandboxPatrons?: boolean): Promise<PatronType[]>;
     protected static _SandboxAddPatron(Patron: SandboxOptions): void;
     protected static _SandboxGetPatron(): SandboxOptions[];
 }
 export declare class Sandbox extends Patreon {
-    static GetSandboxPatrons(): SandboxOptions[];
-    static AddSandboxPatron(Patron: SandboxOptions): void;
+    static GetPatrons(): SandboxOptions[];
+    static AddPatron(Patron: SandboxOptions): void;
 }
 //# sourceMappingURL=index.d.ts.map

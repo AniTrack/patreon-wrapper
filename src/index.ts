@@ -112,7 +112,8 @@ export class Patreon {
 
     public static async FetchPatrons(
         filters: Array<PatronStatus> = ['active_patron'],
-        pageSize: number = 450
+        pageSize: number = 450,
+        showSandboxPatrons: boolean = false
     ) {
         const { data } = await this.FetchAPI(
             this.CleanURL(
@@ -125,48 +126,6 @@ export class Patreon {
         const PatreonAPIPatrons = data?.data || [];
 
         if (PatreonAPIPatrons.length == 0) return [];
-
-        // Format Sandbox Patrons
-        for (let x = 0; x < this._SandboxPatrons.length; x++) {
-            const Patron = this._SandboxPatrons[x];
-
-            Patrons.push({
-                displayId: Patron.displayId,
-                displayName: Patron.displayName,
-                emailAddress: Patron.emailAddress,
-                isFollower: false,
-                subscription: {
-                    note: 'Sandbox',
-                    currentEntitled: {
-                        status: Patron.patronStatus,
-                        tier: {
-                            id: Patron.tier.id,
-                            title: Patron.tier.title,
-                        },
-                        cents: Patron.cents,
-                        willPayCents: Patron.willPayCents,
-                        lifetimeCents: Patron.lifetimeCents,
-                        firstCharge: Patron.firstCharge,
-                        nextCharge: Patron.nextCharge,
-                        lastCharge: Patron.lastCharge,
-                    },
-                },
-                mediaConnection: {
-                    patreon: {
-                        id: Patron.mediaConnection.patreon.id,
-                        url: Patron.mediaConnection.patreon.url,
-                    },
-                    discord: {
-                        id: Patron?.mediaConnection?.discord?.id
-                            ? Patron?.mediaConnection?.discord?.id
-                            : null,
-                        url: Patron?.mediaConnection?.discord?.url
-                            ? Patron?.mediaConnection?.discord?.id
-                            : null,
-                    },
-                },
-            });
-        }
 
         // Format Real Patrons
         for (let x = 0; x < PatreonAPIPatrons.length; x++) {
@@ -235,6 +194,50 @@ export class Patreon {
             });
         }
 
+        if (showSandboxPatrons) {
+            // Format Sandbox Patrons
+            for (let x = 0; x < this._SandboxPatrons.length; x++) {
+                const Patron = this._SandboxPatrons[x];
+
+                Patrons.push({
+                    displayId: Patron.displayId,
+                    displayName: Patron.displayName,
+                    emailAddress: Patron.emailAddress,
+                    isFollower: false,
+                    subscription: {
+                        note: 'Sandbox',
+                        currentEntitled: {
+                            status: Patron.patronStatus,
+                            tier: {
+                                id: Patron.tier.id,
+                                title: Patron.tier.title,
+                            },
+                            cents: Patron.cents,
+                            willPayCents: Patron.willPayCents,
+                            lifetimeCents: Patron.lifetimeCents,
+                            firstCharge: Patron.firstCharge,
+                            nextCharge: Patron.nextCharge,
+                            lastCharge: Patron.lastCharge,
+                        },
+                    },
+                    mediaConnection: {
+                        patreon: {
+                            id: Patron.mediaConnection.patreon.id,
+                            url: Patron.mediaConnection.patreon.url,
+                        },
+                        discord: {
+                            id: Patron?.mediaConnection?.discord?.id
+                                ? Patron?.mediaConnection?.discord?.id
+                                : null,
+                            url: Patron?.mediaConnection?.discord?.url
+                                ? Patron?.mediaConnection?.discord?.id
+                                : null,
+                        },
+                    },
+                });
+            }
+        }
+
         return Patrons;
     }
 
@@ -252,11 +255,11 @@ export class Patreon {
 }
 
 export class Sandbox extends Patreon {
-    public static GetSandboxPatrons() {
+    public static GetPatrons() {
         return super._SandboxGetPatron();
     }
 
-    public static AddSandboxPatron(Patron: SandboxOptions) {
+    public static AddPatron(Patron: SandboxOptions) {
         super._SandboxAddPatron(Patron);
     }
 }

@@ -1,51 +1,35 @@
-# Patreon Wrapper 🍊
+# 🍊 Patreon Wrapper
 
-💎 Simple Patreon wrapper designed best for Discord Bots to process user's patreon subscription and lower down the Patreon API complexity...
+💎 Universal Patron API v2 wrapper that simplifies their API usage in JavaScript
 
-🌄 You can also simulates sandbox of fake Patrons for development and code testing purposes
+> This package was previously used on [AniTrack.co](https://anitrack.co) before switching to the payment gateway
 
-🍊 This package was previously used in [AniTrack](https://anitrack.co) before switching to a real payment gateway
+# Table of Contents
 
-## Table of Contents
-
--   [Installing](#installing)
--   [Real usage example](#Usage%20Example)
--   [Sandbox for development](#Sandboxing)
+-   [Install](#Install%20the%20package)
+-   [Getting Started](#Getting%20Started)
+-   [Sandbox for development](#Patreon%20Sandbox)
 -   [License](#license)
 
 <br />
 
-## Installing
-
-Using NPM
+# Install the package
 
 ```
 $ npm install @anitrack/patreon-wrapper
 ```
 
-Using YARN
+<br />
 
-```
-$ yarn add @anitrack/patreon-wrapper
-```
-
-## Usage Example
-
-### Importing
-
-CommonJS
+# Getting Started
 
 ```js
-const { Patreon } = require('@anitrack/patreon-wrapper')
+import { Patreon } from '@anitrack/patreon-wrapper';
 ```
 
-Typescript ES6
+<br />
 
-```js
-import { Patreon } from '@anitrack/patreon-wrapper'
-```
-
-### Authorization
+# API Authorization
 
 > Where do I find Campaign ID? F12 your Patreon page and search for "campaign" then keep looking until you finds URL with campaign params that contains around 7 degits. That should be your Campaign ID
 
@@ -53,37 +37,30 @@ import { Patreon } from '@anitrack/patreon-wrapper'
 Patreon.Authorization({
     AccessToken: 'YOUR_API_V2_ACCESS_TOKEN',
     CampaignID: 'YOUR_CAPAIGN_ID',
-})
+});
 ```
 
-### Fetching every Patrons on the Campaign
+<br />
 
-Promies then catch
+# Package Usage
+
+## Fetching every Patrons from the Campaign
 
 ```js
-Patreon.FetchPatrons(['active_patron', 'declined_patron'])
-    .then((Patrons) => {
-        // Handle Patrons List
-        console.log(Patrons)
-    })
-    .catch((err) => {
-        // Handle Error
-        console.log(err)
-    })
+const Patrons = await Patreon.FetchPatrons([
+    'active_patron',
+    'declined_patron',
+    'former_patron',
+]);
+
+console.log(Patrons);
 ```
 
-Async/Await
+## Patron object example
+
+console.log(Patrons) from above
 
 ```js
-var Patrons = await Patreon.FetchPatrons(['active_patron', 'declined_patron'])
-
-console.log(Patrons)
-```
-
-Clean Response Example
-
-```js
- // Example response from fetching Patron list
  [
     {
       displayId: '12345678',
@@ -98,10 +75,10 @@ Clean Response Example
             id: '12345678',
             title: 'My First Tier'
           },
-          cents: 500, // 5 USD
+          cents: 500,
           willPayCents: 500,
           lifetimeCents: 1500,
-          firstCharge: '2022-01-15 15:00:00.000', // ISO 8601 DATE
+          firstCharge: '2022-01-15 15:00:00.000',
           nextCharge: '2022-05-15 15:00:00.000',
           lastCharge: '2022-05-15 15:00:00.000'
         }
@@ -117,33 +94,24 @@ Clean Response Example
         }
       }
     },
-    {
     ...
-    },
-    {
-    ...
-    }
 ]
 ```
 
 <br />
 
-## Sandboxing
+# Patreon Sandbox
 
-> This is great for development and working with fake patrons users. The fake patrons object will be exactly the same as real ones!
+> This is great for development and working with sandbox patrons users. The sandbox patrons object will be exactly the same as real ones!
 
-### Importing Sandbox
+## Adding Custom Patrons to the Sandbox
 
-```js
-import { Patreon, Sandbox } from '@anitrack/patreon-wrapper'
-```
-
-### Adding Fake Patrons to the Sandbox
-
-You can repeat this as much as you want
+You can add as much sandbox patrons as you want
 
 ```js
-Sandbox.AppendPatron({
+import { Sandbox } from '@anitrack/patreon-wrapper';
+
+Sandbox.AddPatron({
     displayId: '123', // Patreon ID
     displayName: '123', // Patreon Username
     emailAddress: 'email@address.com', // Patreon Email
@@ -154,7 +122,7 @@ Sandbox.AppendPatron({
     firstCharge: '2022-01-15 15:00:00.000', // ISO 8601 String date format
     nextCharge: '2022-05-15 15:00:00.000',
     lastCharge: '2022-04-15 15:00:00.000',
-    patronStatus: 'active_patron', // Can be 'active_patron' & 'declined_patron'
+    patronStatus: 'active_patron',
     mediaConnection: {
         patreon: {
             id: '123',
@@ -162,29 +130,28 @@ Sandbox.AppendPatron({
         },
         discord: { id: '123', url: 'https://discord.com/users/user_id' },
     },
-})
+});
+
+const Patrons = Sandbox.GetPatrons();
+
+console.log(Patrons);
 ```
 
-### Viewing Fake Patrons Only
+## Get both Sandbox Patrons and Real Patrons
+
+set second boolean argument "showSandboxPatrons" to true
 
 ```js
-Sandbox.GetFakePatrons()
+const Patrons = await Patreon.FetchPatrons(
+    ['active_patron', 'declined_patron', 'former_patron'],
+    true
+);
+
+console.log(Patrons);
 ```
 
-### Viewing Fake Patrons + Real Patrons
+<br />
 
-Just fetch Patrons normally like you would with real ones
-
-```js
-Patreon.FetchPatrons(['active_patron', 'declined_patron'])
-    .then((Patrons) => {
-        console.dir(Patrons, { depth: null })
-    })
-    .catch((err) => {
-        console.log(err)
-    })
-```
-
-## License
+# License
 
 [MIT](LICENSE)
