@@ -1,6 +1,6 @@
 {
     "name": "@anitrack/patreon-wrapper",
-    "version": "1.4.6",
+    "version": "1.5",
     "description": "Universal Patron API v2 wrapper that simplifies the API's response for easier usage and lower response complexity",
     "main": "lib/index.js",
     "types": "lib",
