@@ -5,12 +5,12 @@ export type PatronStatus =
     | 'declined_patron'
     | 'former_patron';
 
-type Auth = {
+export type PatronAPIAuth = {
     AccessToken: string;
     CampaignID: string;
 };
 
-type PatronType = {
+export type PatronType = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -43,7 +43,7 @@ type PatronType = {
     };
 };
 
-type SandboxOptions = {
+export type SandboxOptions = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -75,23 +75,17 @@ export class Patreon {
 
     private static _AccessToken: string;
     private static _CampaignID: string;
-
     private static _SandboxPatrons: Array<SandboxOptions> = [];
 
-    public static Authorization(AuthInformation: Auth) {
-        if (!AuthInformation.AccessToken || !AuthInformation.CampaignID) {
+    public static Authorization(AuthCredentials: PatronAPIAuth) {
+        if (!AuthCredentials.AccessToken || !AuthCredentials.CampaignID) {
             throw new Error(
                 'AccessToken and CampaignID are required on Authorization'
             );
-        } else if (
-            typeof AuthInformation.AccessToken != 'string' ||
-            typeof AuthInformation.CampaignID != 'string'
-        ) {
-            throw new Error('Invalid input, not a type of String');
         }
 
-        this._AccessToken = AuthInformation.AccessToken;
-        this._CampaignID = AuthInformation.CampaignID;
+        this._AccessToken = AuthCredentials.AccessToken;
+        this._CampaignID = AuthCredentials.CampaignID;
     }
 
     private static async FetchAPI(URI: string) {
@@ -109,7 +103,7 @@ export class Patreon {
         });
     }
 
-    private static CleanQueryURL(query: string) {
+    private static CleanURL(query: string) {
         query = query.replaceAll('[', '%5B').replaceAll(']', '%5D');
         query = query.replaceAll(' ', '');
 
@@ -120,20 +114,22 @@ export class Patreon {
         filters: Array<PatronStatus> = ['active_patron'],
         pageSize: number = 450
     ) {
-        const res: any = await this.FetchAPI(
-            this.CleanQueryURL(
+        const { data } = await this.FetchAPI(
+            this.CleanURL(
                 `campaigns/${this._CampaignID}/` +
                     `members ? include = user, currently_entitled_tiers & page[count] = ${pageSize} & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`
             )
         );
 
-        var Patrons: Array<PatronType> = [];
+        const Patrons: Array<PatronType> = [];
+        const PatreonAPIPatrons = data?.data || [];
 
-        if (!res?.data?.data) return [];
-        if (res.data.data.length == 0) return [];
+        if (PatreonAPIPatrons.length == 0) return [];
 
-        // Processing Fake Sandbox Patrons
-        this._SandboxPatrons.forEach((Patron: SandboxOptions) =>
+        // Format Sandbox Patrons
+        for (let x = 0; x < this._SandboxPatrons.length; x++) {
+            const Patron = this._SandboxPatrons[x];
+
             Patrons.push({
                 displayId: Patron.displayId,
                 displayName: Patron.displayName,
@@ -169,57 +165,57 @@ export class Patreon {
                             : null,
                     },
                 },
-            })
-        );
+            });
+        }
 
-        // Processing Real Patrons
-        res.data.data.forEach((Patron: any) => {
-            if (!filters.includes(Patron.attributes.patron_status)) return;
+        // Format Real Patrons
+        for (let x = 0; x < PatreonAPIPatrons.length; x++) {
+            const Relationships = PatreonAPIPatrons[x].relationships;
+            const Attributes = PatreonAPIPatrons[x].attributes;
 
-            var socialInfo = res.data.included.find(
-                (includePatron: any) =>
-                    includePatron.id == Patron.relationships.user.data.id &&
-                    includePatron.type === 'user'
+            if (!filters.includes(Attributes.patron_status)) continue;
+
+            const socialInfo = data.included.find(
+                (patron: any) =>
+                    patron.id == Relationships.user.data.id &&
+                    patron.type === 'user'
             );
 
-            var tierInfo = res.data.included.find(
-                (includePatron: any) =>
-                    includePatron.id ==
-                        Patron.relationships.currently_entitled_tiers?.data[0]
-                            ?.id && includePatron.type === 'tier'
+            const tierInfo = data.included.find(
+                (patron: any) =>
+                    patron.id ==
+                        Relationships.currently_entitled_tiers?.data[0]?.id &&
+                    patron.type === 'tier'
             );
 
             Patrons.push({
-                displayId: Patron.relationships.user.data.id,
-                displayName: Patron.attributes.full_name,
-                emailAddress: Patron.attributes.email,
-                isFollower: Patron.attributes.is_follower,
+                displayId: Relationships.user.data.id,
+                displayName: Attributes.full_name,
+                emailAddress: Attributes.email,
+                isFollower: Attributes.is_follower,
                 subscription: {
-                    note: Patron.attributes.note,
+                    note: Attributes.note,
                     currentEntitled: {
-                        status: Patron.attributes.patron_status,
+                        status: Attributes.patron_status,
                         tier: {
                             id: tierInfo ? tierInfo.id : null,
-                            title: tierInfo ? tierInfo.attributes.title : null,
+                            title: tierInfo ? tierInfo.Attributes.title : null,
                         },
                         cents:
-                            Patron.attributes.currently_entitled_amount_cents !=
-                            0
-                                ? Patron.attributes
-                                      .currently_entitled_amount_cents
+                            Attributes.currently_entitled_amount_cents != 0
+                                ? Attributes.currently_entitled_amount_cents
                                 : null,
-                        willPayCents: Patron.attributes.will_pay_amount_cents,
-                        lifetimeCents: Patron.attributes.lifetime_support_cents,
-                        firstCharge:
-                            Patron.attributes.pledge_relationship_start,
-                        nextCharge: Patron.attributes.next_charge_date,
-                        lastCharge: Patron.attributes.last_charge_date,
+                        willPayCents: Attributes.will_pay_amount_cents,
+                        lifetimeCents: Attributes.lifetime_support_cents,
+                        firstCharge: Attributes.pledge_relationship_start,
+                        nextCharge: Attributes.next_charge_date,
+                        lastCharge: Attributes.last_charge_date,
                     },
                 },
                 mediaConnection: {
                     patreon: {
-                        id: Patron.relationships.user.data.id,
-                        url: Patron.relationships.user.links.related,
+                        id: Relationships.user.data.id,
+                        url: Relationships.user.links.related,
                     },
                     discord: {
                         id: socialInfo?.attributes?.social_connections?.discord
@@ -237,15 +233,16 @@ export class Patreon {
                     },
                 },
             });
-        });
+        }
+
         return Patrons;
     }
 
-    protected static _SandboxAdd(Patron: SandboxOptions) {
+    protected static _SandboxAddPatron(Patron: SandboxOptions) {
         this._SandboxPatrons.push(Patron);
     }
 
-    protected static _SandboxGet() {
+    protected static _SandboxGetPatron() {
         return this._SandboxPatrons;
     }
 
@@ -255,11 +252,11 @@ export class Patreon {
 }
 
 export class Sandbox extends Patreon {
-    public static GetFakePatrons() {
-        return super._SandboxGet();
+    public static GetSandboxPatrons() {
+        return super._SandboxGetPatron();
     }
 
-    public static AppendPatron(Patron: SandboxOptions) {
-        super._SandboxAdd(Patron);
+    public static AddSandboxPatron(Patron: SandboxOptions) {
+        super._SandboxAddPatron(Patron);
     }
 }

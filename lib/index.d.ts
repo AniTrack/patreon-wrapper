@@ -1,9 +1,9 @@
 export type PatronStatus = 'active_patron' | 'declined_patron' | 'former_patron';
-type Auth = {
+export type PatronAPIAuth = {
     AccessToken: string;
     CampaignID: string;
 };
-type PatronType = {
+export type PatronType = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -35,7 +35,7 @@ type PatronType = {
         };
     };
 };
-type SandboxOptions = {
+export type SandboxOptions = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -66,16 +66,15 @@ export declare class Patreon {
     private static _AccessToken;
     private static _CampaignID;
     private static _SandboxPatrons;
-    static Authorization(AuthInformation: Auth): void;
+    static Authorization(AuthCredentials: PatronAPIAuth): void;
     private static FetchAPI;
-    private static CleanQueryURL;
+    private static CleanURL;
     static FetchPatrons(filters?: Array<PatronStatus>, pageSize?: number): Promise<PatronType[]>;
-    protected static _SandboxAdd(Patron: SandboxOptions): void;
-    protected static _SandboxGet(): SandboxOptions[];
+    protected static _SandboxAddPatron(Patron: SandboxOptions): void;
+    protected static _SandboxGetPatron(): SandboxOptions[];
 }
 export declare class Sandbox extends Patreon {
-    static GetFakePatrons(): SandboxOptions[];
-    static AppendPatron(Patron: SandboxOptions): void;
+    static GetSandboxPatrons(): SandboxOptions[];
+    static AddSandboxPatron(Patron: SandboxOptions): void;
 }
-export {};
 //# sourceMappingURL=index.d.ts.map
