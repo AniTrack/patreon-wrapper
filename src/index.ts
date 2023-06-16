@@ -1,118 +1,123 @@
-import axios from 'axios'
+import axios from 'axios';
+
+export type PatronStatus =
+    | 'active_patron'
+    | 'declined_patron'
+    | 'former_patron';
 
 type Auth = {
-    AccessToken: string
-    CampaignID: string
-}
+    AccessToken: string;
+    CampaignID: string;
+};
 
 type PatronType = {
-    displayId: string
-    displayName: string
-    emailAddress: string
-    isFollower: boolean
+    displayId: string;
+    displayName: string;
+    emailAddress: string;
+    isFollower: boolean;
     subscription: {
-        note: string
+        note: string;
         currentEntitled: {
-            status: 'active_patron' | 'declined_patron'
+            status: PatronStatus;
             tier: {
-                id: string
-                title: string
-            }
-            cents: number
-            willPayCents: number
-            lifetimeCents: number
-            firstCharge: string
-            nextCharge: string
-            lastCharge: string
-        }
-    }
+                id: string;
+                title: string;
+            };
+            cents: number;
+            willPayCents: number;
+            lifetimeCents: number;
+            firstCharge: string;
+            nextCharge: string;
+            lastCharge: string;
+        };
+    };
     mediaConnection: {
         patreon: {
-            id: string
-            url: string
-        }
+            id: string;
+            url: string;
+        };
         discord: {
-            id: string | null
-            url: string | null
-        }
-    }
-}
+            id: string | null;
+            url: string | null;
+        };
+    };
+};
 
 type SandboxOptions = {
-    displayId: string
-    displayName: string
-    emailAddress: string
+    displayId: string;
+    displayName: string;
+    emailAddress: string;
     tier: {
-        id: string
-        title: string
-    }
-    cents: number
-    willPayCents: number
-    lifetimeCents: number
-    patronStatus: 'active_patron' | 'declined_patron'
-    firstCharge: string
-    nextCharge: string
-    lastCharge: string
+        id: string;
+        title: string;
+    };
+    cents: number;
+    willPayCents: number;
+    lifetimeCents: number;
+    patronStatus: PatronStatus;
+    firstCharge: string;
+    nextCharge: string;
+    lastCharge: string;
     mediaConnection: {
         patreon: {
-            id: string
-            url: string
-        }
+            id: string;
+            url: string;
+        };
         discord: {
-            id: string | null
-            url: string | null
-        }
-    }
-}
+            id: string | null;
+            url: string | null;
+        };
+    };
+};
 
 export class Patreon {
-    private static _URL: string = 'https://www.patreon.com/api/oauth2/v2/'
+    private static _URL: string = 'https://www.patreon.com/api/oauth2/v2/';
 
-    private static _AccessToken: string
-    private static _CampaignID: string
+    private static _AccessToken: string;
+    private static _CampaignID: string;
 
-    private static _SandboxPatrons: Array<SandboxOptions> = []
+    private static _SandboxPatrons: Array<SandboxOptions> = [];
 
     public static Authorization(AuthInformation: Auth) {
         if (!AuthInformation.AccessToken || !AuthInformation.CampaignID) {
             throw new Error(
                 'AccessToken and CampaignID are required on Authorization'
-            )
+            );
         } else if (
             typeof AuthInformation.AccessToken != 'string' ||
             typeof AuthInformation.CampaignID != 'string'
         ) {
-            throw new Error('Invalid input, not a type of String')
+            throw new Error('Invalid input, not a type of String');
         }
 
-        this._AccessToken = AuthInformation.AccessToken
-        this._CampaignID = AuthInformation.CampaignID
+        this._AccessToken = AuthInformation.AccessToken;
+        this._CampaignID = AuthInformation.CampaignID;
     }
 
     private static async FetchAPI(URI: string) {
         if (!this._AccessToken || !this._CampaignID) {
             throw new Error(
                 'AccessToken and CampaignID are required on Authorization'
-            )
+            );
         }
 
         return await axios(this._URL + URI, {
             method: 'GET',
             headers: { Authorization: 'Bearer ' + this._AccessToken },
         }).catch((err: Error) => {
-            throw new Error('Fetch API Failed...' + err)
-        })
+            throw new Error('Fetch API Failed...' + err);
+        });
     }
 
     private static CleanQueryURL(query: string) {
-        query = query.replaceAll('[', '%5B').replaceAll(']', '%5D')
-        query = query.replaceAll(' ', '')
+        query = query.replaceAll('[', '%5B').replaceAll(']', '%5D');
+        query = query.replaceAll(' ', '');
 
-        return query
+        return query;
     }
 
     public static async FetchPatrons(
-        filters: Array<'active_patron' | 'declined_patron'> = ['active_patron'],
+        filters: Array<PatronStatus> = ['active_patron'],
         pageSize: number = 450
     ) {
         const res: any = await this.FetchAPI(
@@ -120,12 +125,12 @@ export class Patreon {
                 `campaigns/${this._CampaignID}/` +
                     `members ? include = user, currently_entitled_tiers & page[count] = ${pageSize} & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`
             )
-        )
+        );
 
-        var Patrons: Array<PatronType> = []
+        var Patrons: Array<PatronType> = [];
 
-        if (!res?.data?.data) return []
-        if (res.data.data.length == 0) return []
+        if (!res?.data?.data) return [];
+        if (res.data.data.length == 0) return [];
 
         // Processing Fake Sandbox Patrons
         this._SandboxPatrons.forEach((Patron: SandboxOptions) =>
@@ -165,24 +170,24 @@ export class Patreon {
                     },
                 },
             })
-        )
+        );
 
         // Processing Real Patrons
         res.data.data.forEach((Patron: any) => {
-            if (!filters.includes(Patron.attributes.patron_status)) return
+            if (!filters.includes(Patron.attributes.patron_status)) return;
 
             var socialInfo = res.data.included.find(
                 (includePatron: any) =>
                     includePatron.id == Patron.relationships.user.data.id &&
                     includePatron.type === 'user'
-            )
+            );
 
             var tierInfo = res.data.included.find(
                 (includePatron: any) =>
                     includePatron.id ==
                         Patron.relationships.currently_entitled_tiers?.data[0]
                             ?.id && includePatron.type === 'tier'
-            )
+            );
 
             Patrons.push({
                 displayId: Patron.relationships.user.data.id,
@@ -231,17 +236,17 @@ export class Patreon {
                                 : null,
                     },
                 },
-            })
-        })
-        return Patrons
+            });
+        });
+        return Patrons;
     }
 
     protected static _SandboxAdd(Patron: SandboxOptions) {
-        this._SandboxPatrons.push(Patron)
+        this._SandboxPatrons.push(Patron);
     }
 
     protected static _SandboxGet() {
-        return this._SandboxPatrons
+        return this._SandboxPatrons;
     }
 
     // public static FetchPatron() {}
@@ -251,10 +256,10 @@ export class Patreon {
 
 export class Sandbox extends Patreon {
     public static GetFakePatrons() {
-        return super._SandboxGet()
+        return super._SandboxGet();
     }
 
     public static AppendPatron(Patron: SandboxOptions) {
-        super._SandboxAdd(Patron)
+        super._SandboxAdd(Patron);
     }
 }

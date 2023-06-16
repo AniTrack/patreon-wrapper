@@ -1,8 +1,9 @@
-declare type Auth = {
+export type PatronStatus = 'active_patron' | 'declined_patron' | 'former_patron';
+type Auth = {
     AccessToken: string;
     CampaignID: string;
 };
-declare type PatronType = {
+type PatronType = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -10,7 +11,7 @@ declare type PatronType = {
     subscription: {
         note: string;
         currentEntitled: {
-            status: 'active_patron' | 'declined_patron';
+            status: PatronStatus;
             tier: {
                 id: string;
                 title: string;
@@ -34,7 +35,7 @@ declare type PatronType = {
         };
     };
 };
-declare type SandboxOptions = {
+type SandboxOptions = {
     displayId: string;
     displayName: string;
     emailAddress: string;
@@ -45,7 +46,7 @@ declare type SandboxOptions = {
     cents: number;
     willPayCents: number;
     lifetimeCents: number;
-    patronStatus: 'active_patron' | 'declined_patron';
+    patronStatus: PatronStatus;
     firstCharge: string;
     nextCharge: string;
     lastCharge: string;
@@ -68,7 +69,7 @@ export declare class Patreon {
     static Authorization(AuthInformation: Auth): void;
     private static FetchAPI;
     private static CleanQueryURL;
-    static FetchPatrons(filters?: Array<'active_patron' | 'declined_patron'>, pageSize?: number): Promise<PatronType[]>;
+    static FetchPatrons(filters?: Array<PatronStatus>, pageSize?: number): Promise<PatronType[]>;
     protected static _SandboxAdd(Patron: SandboxOptions): void;
     protected static _SandboxGet(): SandboxOptions[];
 }
