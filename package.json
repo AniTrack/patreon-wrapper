@@ -1,6 +1,6 @@
 {
     "name": "@anitrack/patreon-wrapper",
-    "version": "1.5.2",
+    "version": "1.5.3",
     "description": "Universal Patron API v2 wrapper that simplifies their API usage in JavaScript",
     "main": "lib/index.js",
     "types": "lib",
@@ -24,7 +24,7 @@
     },
     "homepage": "https://github.com/AniTrack/patreon-wrapper#readme",
     "dependencies": {
-        "axios": "^0.27.2"
+        "axios": "^1.6.8"
     },
     "publishConfig": {
         "access": "public"
