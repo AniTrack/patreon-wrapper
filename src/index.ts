@@ -158,7 +158,7 @@ export class Patreon {
                         status: Attributes.patron_status,
                         tier: {
                             id: tierInfo ? tierInfo.id : null,
-                            title: tierInfo ? tierInfo.Attributes.title : null,
+                            title: tierInfo ? tierInfo.attributes.title : null,
                         },
                         cents:
                             Attributes.currently_entitled_amount_cents != 0
