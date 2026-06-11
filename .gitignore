@@ -1,3 +1,2 @@
-/node_modules
-patreon-wrapper.code-workspace
-devTEST.*
+node_modules
+package-lock.json
