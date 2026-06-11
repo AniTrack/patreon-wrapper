@@ -13,86 +13,89 @@ class Patreon {
         this._AccessToken = AuthCredentials.AccessToken;
         this._CampaignID = AuthCredentials.CampaignID;
     }
-    static async FetchAPI(URI) {
+    static async FetchAPI(url) {
         if (!this._AccessToken || !this._CampaignID) {
             throw new Error('AccessToken and CampaignID are required on Authorization');
         }
-        return await (0, axios_1.default)(this._URL + URI, {
+        const resolvedUrl = url.startsWith('http') ? url : this._URL + url;
+        return await (0, axios_1.default)(resolvedUrl, {
             method: 'GET',
             headers: { Authorization: 'Bearer ' + this._AccessToken },
         }).catch((err) => {
             throw new Error('Fetch API Failed...' + err);
         });
     }
-    static CleanURL(query) {
-        query = query.replaceAll('[', '%5B').replaceAll(']', '%5D');
-        query = query.replaceAll(' ', '');
-        return query;
+    static BuildMembersURL(pageSize) {
+        const params = new URLSearchParams({
+            include: 'user,currently_entitled_tiers',
+            'page[count]': String(pageSize),
+            'fields[member]': 'currently_entitled_amount_cents,campaign_lifetime_support_cents,email,full_name,is_follower,last_charge_date,last_charge_status,next_charge_date,note,patron_status,pledge_relationship_start,will_pay_amount_cents',
+            'fields[user]': 'social_connections',
+            'fields[tier]': 'title',
+        });
+        return `${this._URL}campaigns/${this._CampaignID}/members?${params.toString()}`;
     }
     static async FetchPatrons(filters = ['active_patron'], pageSize = 450, showSandboxPatrons = false) {
-        const { data } = await this.FetchAPI(this.CleanURL(`campaigns/${this._CampaignID}/` +
-            `members ? include = user, currently_entitled_tiers & page[count] = ${pageSize} & fields[member] = campaign_lifetime_support_cents, currently_entitled_amount_cents, email, full_name, is_follower, last_charge_date, last_charge_status, lifetime_support_cents, next_charge_date, note, patron_status, pledge_cadence, pledge_relationship_start, will_pay_amount_cents & fields[user] = social_connections & fields[tier] = title`));
         const Patrons = [];
-        const PatreonAPIPatrons = data?.data || [];
-        if (PatreonAPIPatrons.length == 0)
-            return [];
-        // Format Real Patrons
-        for (let x = 0; x < PatreonAPIPatrons.length; x++) {
-            const Relationships = PatreonAPIPatrons[x].relationships;
-            const Attributes = PatreonAPIPatrons[x].attributes;
-            if (!filters.includes(Attributes.patron_status))
-                continue;
-            const socialInfo = data.included.find((patron) => patron.id == Relationships.user.data.id &&
-                patron.type === 'user');
-            const tierInfo = data.included.find((patron) => patron.id ==
-                Relationships.currently_entitled_tiers?.data[0]?.id &&
-                patron.type === 'tier');
-            Patrons.push({
-                displayId: Relationships.user.data.id,
-                displayName: Attributes.full_name,
-                emailAddress: Attributes.email,
-                isFollower: Attributes.is_follower,
-                subscription: {
-                    note: Attributes.note,
-                    currentEntitled: {
-                        status: Attributes.patron_status,
-                        tier: {
-                            id: tierInfo ? tierInfo.id : null,
-                            title: tierInfo ? tierInfo.attributes.title : null,
+        let nextUrl = this.BuildMembersURL(pageSize);
+        while (nextUrl) {
+            const { data } = await this.FetchAPI(nextUrl);
+            const PagePatrons = data?.data || [];
+            for (let x = 0; x < PagePatrons.length; x++) {
+                const Relationships = PagePatrons[x].relationships;
+                const Attributes = PagePatrons[x].attributes;
+                if (!filters.includes(Attributes.patron_status))
+                    continue;
+                const socialInfo = data.included?.find((item) => item.id === Relationships.user.data.id &&
+                    item.type === 'user');
+                const tierInfo = data.included?.find((item) => item.id ===
+                    Relationships.currently_entitled_tiers?.data[0]
+                        ?.id && item.type === 'tier');
+                const discordId = socialInfo?.attributes?.social_connections?.discord
+                    ?.user_id ?? null;
+                Patrons.push({
+                    displayId: Relationships.user.data.id,
+                    displayName: Attributes.full_name ?? null,
+                    emailAddress: Attributes.email ?? null,
+                    isFollower: Attributes.is_follower,
+                    subscription: {
+                        note: Attributes.note,
+                        currentEntitled: {
+                            status: Attributes.patron_status,
+                            lastChargeStatus: Attributes.last_charge_status ?? null,
+                            tier: {
+                                id: tierInfo ? tierInfo.id : null,
+                                title: tierInfo
+                                    ? tierInfo.attributes.title
+                                    : null,
+                            },
+                            cents: Attributes.currently_entitled_amount_cents !== 0
+                                ? Attributes.currently_entitled_amount_cents
+                                : null,
+                            willPayCents: Attributes.will_pay_amount_cents,
+                            lifetimeCents: Attributes.campaign_lifetime_support_cents,
+                            firstCharge: Attributes.pledge_relationship_start,
+                            nextCharge: Attributes.next_charge_date,
+                            lastCharge: Attributes.last_charge_date,
                         },
-                        cents: Attributes.currently_entitled_amount_cents != 0
-                            ? Attributes.currently_entitled_amount_cents
-                            : null,
-                        willPayCents: Attributes.will_pay_amount_cents,
-                        lifetimeCents: Attributes.lifetime_support_cents,
-                        firstCharge: Attributes.pledge_relationship_start,
-                        nextCharge: Attributes.next_charge_date,
-                        lastCharge: Attributes.last_charge_date,
                     },
-                },
-                mediaConnection: {
-                    patreon: {
-                        id: Relationships.user.data.id,
-                        url: Relationships.user.links.related,
+                    mediaConnection: {
+                        patreon: {
+                            id: Relationships.user.data.id,
+                            url: Relationships.user.links.related,
+                        },
+                        discord: {
+                            id: discordId,
+                            url: discordId
+                                ? `https://discord.com/users/${discordId}`
+                                : null,
+                        },
                     },
-                    discord: {
-                        id: socialInfo?.attributes?.social_connections?.discord
-                            ?.user_id
-                            ? socialInfo?.attributes?.social_connections
-                                ?.discord?.user_id
-                            : null,
-                        url: 'https://discordapp.com/users/' +
-                            socialInfo?.attributes?.social_connections?.discord
-                                ?.user_id
-                            ? socialInfo?.attributes?.social_connections
-                                ?.discord?.user_id
-                            : null,
-                    },
-                },
-            });
+                });
+            }
+            nextUrl = data?.links?.next ?? null;
         }
         if (showSandboxPatrons) {
-            // Format Sandbox Patrons
             for (let x = 0; x < this._SandboxPatrons.length; x++) {
                 const Patron = this._SandboxPatrons[x];
                 Patrons.push({
@@ -104,6 +107,7 @@ class Patreon {
                         note: 'Sandbox',
                         currentEntitled: {
                             status: Patron.patronStatus,
+                            lastChargeStatus: null,
                             tier: {
                                 id: Patron.tier.id,
                                 title: Patron.tier.title,
@@ -122,12 +126,8 @@ class Patreon {
                             url: Patron.mediaConnection.patreon.url,
                         },
                         discord: {
-                            id: Patron?.mediaConnection?.discord?.id
-                                ? Patron?.mediaConnection?.discord?.id
-                                : null,
-                            url: Patron?.mediaConnection?.discord?.url
-                                ? Patron?.mediaConnection?.discord?.id
-                                : null,
+                            id: Patron.mediaConnection.discord?.id ?? null,
+                            url: Patron.mediaConnection.discord?.url ?? null,
                         },
                     },
                 });
@@ -140,6 +140,28 @@ class Patreon {
     }
     static _SandboxGetPatron() {
         return this._SandboxPatrons;
+    }
+    // public static FetchPatron() {}
+    static async FetchCampaign() {
+        const params = new URLSearchParams({
+            'fields[campaign]': 'name,currency,patron_count,is_monthly,is_nsfw,summary,created_at,published_at,image_url,image_small_url,discord_server_id',
+        });
+        const { data } = await this.FetchAPI(`campaigns/${this._CampaignID}?${params.toString()}`);
+        const Attributes = data?.data?.attributes;
+        return {
+            id: data?.data?.id,
+            name: Attributes.name,
+            patronCount: Attributes.patron_count,
+            currency: Attributes.currency,
+            isMonthly: Attributes.is_monthly,
+            isNsfw: Attributes.is_nsfw,
+            summary: Attributes.summary ?? null,
+            createdAt: Attributes.created_at,
+            publishedAt: Attributes.published_at ?? null,
+            imageUrl: Attributes.image_url ?? null,
+            imageSmallUrl: Attributes.image_small_url ?? null,
+            discordServerId: Attributes.discord_server_id ?? null,
+        };
     }
 }
 exports.Patreon = Patreon;
