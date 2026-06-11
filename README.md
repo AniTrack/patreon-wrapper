@@ -44,6 +44,32 @@ Patreon.Authorization({
 
 # Package Usage
 
+## Fetching Campaign Info
+
+```js
+const Campaign = await Patreon.FetchCampaign();
+console.log(Campaign);
+```
+
+## Campaign object example
+
+```js
+{
+    id: '1234567',
+    name: 'My Campaign',
+    patronCount: 142,
+    currency: 'USD',
+    isMonthly: true,
+    isNsfw: false,
+    summary: 'Support my work.',
+    createdAt: '2022-01-15T15:00:00.000+00:00',
+    publishedAt: '2022-01-16T10:00:00.000+00:00',
+    imageUrl: 'https://example.url',
+    imageSmallUrl: 'https://example.url',
+    discordServerId: '1234567890'
+}
+```
+
 ## Fetching every Patrons from the Campaign
 
 ```js
@@ -71,6 +97,7 @@ console.log(Patrons) from above
         note: '',
         currentEntitled: {
           status: 'active_patron',
+          lastChargeStatus: 'Paid',
           tier: {
             id: '12345678',
             title: 'My First Tier'
@@ -90,7 +117,7 @@ console.log(Patrons) from above
         },
         discord: {
           id: '12345678',
-          url: 'https://discordapp.com/users/12345678'
+          url: 'https://discord.com/users/12345678'
         }
       }
     },
@@ -139,11 +166,12 @@ console.log(Patrons);
 
 ## Get both Sandbox Patrons and Real Patrons
 
-set second boolean argument "showSandboxPatrons" to true
+set third boolean argument "showSandboxPatrons" to true
 
 ```js
 const Patrons = await Patreon.FetchPatrons(
     ['active_patron', 'declined_patron', 'former_patron'],
+    450,
     true
 );
 
