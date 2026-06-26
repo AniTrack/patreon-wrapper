@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 export type PatronStatus =
     | 'active_patron'
     | 'declined_patron'
@@ -113,12 +111,26 @@ export class Patreon {
 
         const resolvedUrl = url.startsWith('http') ? url : this._URL + url;
 
-        return await axios(resolvedUrl, {
-            method: 'GET',
-            headers: { Authorization: 'Bearer ' + this._AccessToken },
-        }).catch((err: Error) => {
-            throw new Error('Fetch API Failed...' + err);
-        });
+        let response: Response;
+
+        try {
+            response = await fetch(resolvedUrl, {
+                method: 'GET',
+                headers: { Authorization: 'Bearer ' + this._AccessToken },
+            });
+        } catch (err) {
+            throw new Error('Fetch API Failed...' + String(err));
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                `Fetch API Failed...Error: Request failed with status code ${response.status}`
+            );
+        }
+
+        const data = await response.json();
+
+        return { data };
     }
 
     private static BuildMembersURL(pageSize: number): string {

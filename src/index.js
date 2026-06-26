@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Sandbox = exports.Patreon = void 0;
-const axios_1 = __importDefault(require("axios"));
 class Patreon {
     static Authorization(AuthCredentials) {
         if (!AuthCredentials.AccessToken || !AuthCredentials.CampaignID) {
@@ -18,12 +14,21 @@ class Patreon {
             throw new Error('AccessToken and CampaignID are required on Authorization');
         }
         const resolvedUrl = url.startsWith('http') ? url : this._URL + url;
-        return await (0, axios_1.default)(resolvedUrl, {
-            method: 'GET',
-            headers: { Authorization: 'Bearer ' + this._AccessToken },
-        }).catch((err) => {
-            throw new Error('Fetch API Failed...' + err);
-        });
+        let response;
+        try {
+            response = await fetch(resolvedUrl, {
+                method: 'GET',
+                headers: { Authorization: 'Bearer ' + this._AccessToken },
+            });
+        }
+        catch (err) {
+            throw new Error('Fetch API Failed...' + String(err));
+        }
+        if (!response.ok) {
+            throw new Error(`Fetch API Failed...Error: Request failed with status code ${response.status}`);
+        }
+        const data = await response.json();
+        return { data };
     }
     static BuildMembersURL(pageSize) {
         const params = new URLSearchParams({
