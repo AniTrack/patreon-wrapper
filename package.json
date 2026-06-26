@@ -1,35 +1,33 @@
 {
-  "name": "@anitrack/patreon-wrapper",
-  "version": "1.7.0",
-  "description": "Universal Patron API v2 wrapper that simplifies their API usage in JavaScript",
-  "main": "src/index.js",
-  "types": "lib",
-  "scripts": {
-    "build": "tsc -p ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/AniTrack/patreon-wrapper.git"
-  },
-  "author": "AniTrack",
-  "keywords": [
-    "patreon",
-    "discord",
-    "api"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/AniTrack/patreon-wrapper/issues"
-  },
-  "homepage": "https://github.com/AniTrack/patreon-wrapper#readme",
-  "dependencies": {
-    "axios": "^1.17.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
-  }
+    "name": "@anitrack/patreon-wrapper",
+    "version": "1.7.0",
+    "description": "Universal Patron API v2 wrapper that simplifies their API usage in JavaScript",
+    "main": "src/index.js",
+    "types": "lib",
+    "scripts": {
+        "build": "tsc -p ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/AniTrack/patreon-wrapper.git"
+    },
+    "author": "AniTrack",
+    "keywords": [
+        "patreon",
+        "discord",
+        "api"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/AniTrack/patreon-wrapper/issues"
+    },
+    "homepage": "https://github.com/AniTrack/patreon-wrapper#readme",
+    "dependencies": {},
+    "publishConfig": {
+        "access": "public"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "typescript": "^6.0.3"
+    }
 }
